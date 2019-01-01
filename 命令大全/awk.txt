@@ -1,0 +1,549 @@
+awk输出：
+一、print
+print的使用格式：
+	print item1，item2
+要点：
+1、各个项目之间使用逗号分开，而输出的时候则以空白字符分割
+2、输出的item可以为字符串或数值，当前记录的字段（如$1）、变量或awk的表达式；数值会先转换为字符串，而后输出
+3、print命令后面的item可以省略，此时其功能相当于print $1，因此，如果想输出空白行，则需要使用print ""
+例子：
+awk 'BEGIN{print "line one\nline two\nline three"}'
+awk -F ":"  '{print $1,$3}' /ect/passwd
+
+二、awk变量
+2.1 awk内置变量至记录变量：
+FS：field separate读取文本时，所使用的字段分隔符（每行之间的字段分隔符）
+RS：Record separate输入文本信息所使用的换行符（上下行之间的分隔符）
+范例：
+[root@Start ~]# awk '{RS="70";OFS="*";ORS="##"}{print $4,$5}END{printf "\n"}' yum.log           
+97*70##87*56##
+
+OFS：输出文本时，所使用的字段分隔符（每行之间的字段分隔符）
+ORS：输出文本信息所使用的换行符（上下行之间的分隔符）
+[root@Start ~]# cat  yum.log 
+aa 10001 80 97 70+
+bb 10002 63 87 56
+cc 10003 80 85 93
+dd 10004 81 90 81
+范例
+[root@Start ~]# awk '{RS="70";OFS="*";ORS="##"}{print $4,$5}END{printf "\n"}' yum.log           
+97*70##87*56##
+awk -F 	":"
+OFS=":"
+FS=":"
+总结：输入输出变量写在{}里面，如果有多个输入输出格式可以用分号隔开
+
+
+
+2.2、awk内置变量之数据变量
+NR：awk命令所处理的记录数，如果有多个文件，这个数目会把处理的多个文件统一计数
+NF：当前记录的个数
+FNR：与NR不同的是，FNR用于记录正处理的行是当前这一文件中被总共处理的行数
+
+
+
+
+
+2.3、用户自定义变量
+awk允许用户自定义的变量以便在程序代码中使用，变量名命令规则与大多数编程语言相同，只能使用字母，数字和下划线，且不能以数字开头，gwak变量名区分字符大小写
+
+2.3.1在脚本中赋值变量
+在gawk中给变量赋值语句
+awk 'BGEGIN{var="variable testing";print var}'
+2.3.2在命令行中使用赋值变量
+awk -v  var="variable testing" 'BGEGIN{print var}'
+
+三、printf
+printf命令的使用格式：
+prinf format，item1，item2....
+格式和格式直接无需分隔符
+要点：
+1、与其print命令的最大不同的是，printf需要指定format；
+2、format用于指定后的每个item的输出格式
+3、printf语句不会自动打印换行符，如果需要换行需加上：\n
+
+format格式的指示符都以%开头，后跟一个字符：如下：
+%c：显示字符的ASSCII码
+%d，%i：十进制整数
+%f：显示浮点数
+%s：显示字符串
+%u：无符号整数
+%e，%E：科学计数法显示数值
+%%：显示%自身
+
+修饰符：
+N：显示宽度
+-：左对齐
++：显示数值符号
+
+六、awk操作符
+awk支持各种操作符合，bash shell基本一样
+有个特殊的布尔值
+在awk中，任何非0值或非空字符串都为真，反之为假
+x ~ y y为匹配模式，如正则表达式，如果x匹配上y就为真
+x !~ y 与其相反
+
+
+七、awk模式介绍（重点）
+awk [options] 'PATTERN {action}' file1 file2,....
+PATTERN {action}
+PATTERN {action}
+...
+PATTERN多个模式的用逗号隔开
+action中可以使用逗号或分号隔开
+逗号：和语句一起执行，语句中的部分
+分号：上一个语句执行完毕后，再执行分号后面的语句
+7.1常见的PATTERN类型有：
+1、Regexp：正则表达式，格式为/regular expression/
+例如：awk -F ":" '/^s/{print $0}'  /etc/passwd 
+
+2、expression:表达式，其值非0或为非空字符时满足条件，如：$1 ~ /root/或$1=="magedu",用运算符~合!~不配置
+例如： awk -F ":"   '$3>500{ OFS="#";print $1,$3}'  /etc/passwd
+       awk -F ":"   '$7 ~ "bash$" {print $0}'  /etc/passwd 
+       awk -F ":"   '$3 ~ "^[0-9]..$" {print $0}'  /etc/passwd
+
+3、Ranges：指定的匹配范围，格式为pat1，pat2
+例如：awk -F ":"   'NR>=20&&NR<=30,$3 ~ "^[0-9]..$" {print $0}'  /etc/passwd 
+      awk -F ":"   '/root/,/fenfa/ {print $0}'  /etc/passwd
+4、Empty（空模式）：匹配任意输入
+awk -F ":"   '{print $0}'  /etc/passwd
+
+5、BEGIN/END:特殊模式，仅在awk命令执行前运行一次或结束前运行一次
+例如：awk -F ":"  'BEGIN{print "start"}$3>500{print $0}END{print "end"}'  /etc/passwd 
+注意：BEGIN{print "start"}写在最前面，不然会有语法错误
+/正则表达式/：使用通配符的扩展集
+关系表达式：可以用下面运算符表中的关系运算符进行的操作，可以是字符串或数字的比较，如$1>%1选择第二个字段比第一个字段长的行
+模式匹配表达式
+模式：指定一个范围，该语法不能包括BEGIN和END模式
+BEGIN：让用户指定在第一条输入记录被处理之前所发生的的动作，通常可以在这里设置全局       变量
+END：让用户在最后一条输入记录被读取之后发生的动作
+
+
+
+
+7.2常见的Action
+1、Expression:表达式
+2、Control statensnts控制语句，if判断，for循环，case等语句
+3、Compound statensnts复合语句，输入输出
+4、Input statensnts
+5、Output statensnts
+
+八控制语句：
+8.1 if-else
+语法：if (condition){then-body}else{[else-body]}
+例子：
+awk -F ":" '{if ($1=="root") print $1,"Admin";else print $1,"Commer User"}' /etc/passwd
+awk -F ":" '{if ($1=="root") printf "%-10s:%s\n" ,$1,"Admin";else printf "%-10s:%s\n", $1,"Commer User"}' /etc/passwd
+使用格式化输入，使之更加美观
+awk -F ":" -v "sum1=0 sum2=0"  '{if($3>50) print $0 sum1++;sum2++}END{print sum1,sum2}' /etc/passwd
+awk -F ":" -v count=0 '{if(length($3)==1) count++}END{print count}' /etc/passwd          
+9
+变量可以使用多个，分别统计大于50的和整个列的数目
+awk内置很多函数计算字符长度的函数为length($n),多使用awk内置函数
+
+free -m|awk 'NR>3{if($4>300) print $0}'
+
+8.2 for
+语法：for (variable assignement;condition;iteration process){statement1,statement2...}
+awk -F ":"  '{for(i=1;i<=NF;i++) print $i}'
+awk -F ":"  'NR==1{for(i=1;i<=NF;i++){if(length($i)>4) {print $i}}' /etc/passwd
+
+8.3next
+提前结束对本行中的处理，并接着处理一下行
+
+
+
+
+
+
+
+
+胡帅：
+1、
+awk中BEGIN/END:特殊模式，仅在awk命令执行前运行一次或结束前运行一次
+用于打印标题和结尾，生产场景中常用于对变量的复制
+awk -F ","  'BEGIN{value1=1;value2=2}{print $3,value1,value2}END{print "=======end=========="}'  yum.log  
+多个变量需要用分号隔开；如果是-v参数直接"value1=1 value2=2"空格隔开即可
+
+[root@Start ~]# awk '{array[$3]++}END{for(i in array) print i,array[i]}' yum.log 
+awk数组功能进行计数
+
+
+在awk中，变量属于弱类型，什么都不赋值为空，如果和数字相加默认是
+每行指定列进行相加
+[root@Start ~]# awk   '{a=$4+$5+$3;print $0,a,int(a/3)}' yum.log 
+aa 10001 80 97 70 247 82
+bb 10002 63 87 56 206 68
+cc 10003 80 85 93 258 86
+dd 10004 81 90 81 252 84
+[root@Start ~]# awk   'a=$4+$5+$3{print $0,a,int(a/3)}' yum.log   
+aa 10001 80 97 70 247 82
+bb 10002 63 87 56 206 68
+cc 10003 80 85 93 258 86
+dd 10004 81 90 81 252 84
+变量可以写到action里面和外面，如果是字符串一定要有""引起来
+
+每列指定的列相加此方法很有用
+END：让用户在最后一条输入记录被读取之后发生的动作
+[root@Start ~]# awk '{a+=$3;b+=$4;c+=$5}{print $0}END{printf "%5d%5d%8d\n", a,b,c}' yum.log  
+aa 10001 80 97 70
+bb 10002 63 87 56
+cc 10003 80 85 93
+dd 10004 81 90 81
+  304  359     300
+[root@Start ~]# ps aux|awk '{a+=$4}END{print a}'            
+10.1
+此方法可以进行统计内存和CUP使用情况，非常之有用，务必掌握哦
+[root@Start ~]# awk  '{print $0}{A[a1]+=$3;B[b1]+=$4;C[c1]+=$5}END{for(i in A) print A[i],B[i],C[i]}' yum.log 
+aa 10001 80 97 70
+bb 10002 63 87 56
+cc 10003 80 85 93
+dd 10004 81 90 81
+304 359 300
+此方式可以统计每行的指定列的计数，这种方法是不是有点麻烦哦
+
+二，
+2.1、awk的if判断句
+awk -F "[ .]+" '{if($5>=1024) print $0}'
+awk -F "[ .]+" '{if($5>=1024){print $0}}'
+awk -F "[ .]+" '$5>=1024{print $0}'
+awk '{if($1=="cc"){print $0}else{$1=11;print $0}}' yum.log 
+三种方式的写法：推荐使用第一种，第三种简单，属于表达式，看自己喜欢那种模式
+if还是写在action里面，外面还可以加其它的判断
+2.2、awk变量
+[root@Start ~]# awk -va=2 '{print a}' yum.log 属于正统的变量赋值方法
+提示：awk中，变量引用无需使用$符号
+[root@Start ~]# awk '{a=2;print $a}' yum.log
+[root@Start ~]# awk  'BEGIN{a=1}{print a}' yum.log   
+后面两种方法也可以
+三、
+awk的for循环
+3.1
+[root@Start ~]# awk  '{for(i=1;i<=NF;i++)print $i}' yum.log  
+[root@Start ~]# awk  '{for(i=1;i<=NF;i+=2)printf  $i " "}{print ""}' yum.log   
+aa 80 70 
+bb 63 56 
+cc 80 93 
+dd 81 81 
+此方法工作中常用，for循环如果有print就换行了，使用printf不换行，$i引号中可以接任何字符，当做分隔符，后面单独使用{print ""}表示处理完这行后进行换行
+3.2
+awk '{for(i=1;i<=NF;i++)n++}END{print n}' file1  统计file1文件字符的个数
+for(i=1;i<=NF;i++)就是遍历所有file1文件中默认以空格分割的元素
+
+awk 'END{print NR}' file1 统计file1文件行数，当然行数最常用wc -l
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+学习awk的实战总结：
+awk读取数据的模式的一行行读入，我们使用awk处理的模式也只是一行，然后wak本身的机制会自动读写一下一行，所以我们在使用awk的时候，就专注一行就好了
+在awk中，变量属于弱类型，什么都不赋值为空，如果和数字相加默认是0
+在awk中，任何非0值或非空字符串都为真，反之为假
+在awk中，正则匹配必须要用//不然就可能不正确
+http://www.cnblogs.com/losbyday/p/5854725.html
+
+1、awk之for循环
+1.1遍历每行的字段
+[root@Start ~]# awk  '{for(i=1;i<=NF;i++)print $i}' file1 默认一个字段一行
+[root@Start ~]# awk  '{for(i=1;i<=NF;i++)printf $i " "}END{print ""}' file1 
+所有字段显示在一行空格为分隔符
+[root@Start ~]# awk   '{for(i=1;i<=NF;i++)if($i=="13")print NR,i}' file1 
+打印具体单词所在的行列的位置
+awk '{for(i=1;i<=NF;i++)n++}END{print n}' file1  统计file1文件字符的个数
+[root@Start ~]# awk '{for(i=1;i<=NF;i++)if($i==31)n++}END{print n}'  file1
+对对某个元素出现的次数给与统计如等于31出现的次数，for循环前面可以加上很多判断，如查询范围(/aa/,/gg/之间)
+[root@Start ~]# awk '{for(i=1;i<=NF;i++)if($i==31)count++}{for(i=1;i<=NF;i++)if($i==31)print NR,i}END{print count}' file1
+以上两个可以合并在一起，awk可以分布判断得出结果，然后统一打印出来
+
+for(i=1;i<=NF;i++)就是遍历所有file1文件中默认以空格分割的元素
+如果for循环后面有条件判断直接使用if语句即可
+说明：
+for(i=1;i<=NF;i++)就是遍历file1文件中默认以空格分割每行的字段
+printf命令的使用格式：
+prinf format，item1，item2....
+格式和格式直接无需分隔符
+要点：
+1、与其print命令的最大不同的是，printf需要指定format；
+2、format用于指定后的每个item的输出格式
+3、printf语句不会自动打印换行符，如果需要换行需加上：\n
+format格式的指示符都以%开头，后跟一个字符：如下：
+%c：显示字符的ASSCII码
+%d，%i：十进制整数
+%f：显示浮点数
+%s：显示字符串
+%u：无符号整数
+%e，%E：科学计数法显示数值
+%%：显示%自身
+
+修饰符：
+N：显示宽度
+-：左对齐
++：显示数值符号
+[root@Start ~]# awk  '{for(i=1;i<=NF;i++)if(length($i)>=2) printf $i " ",count++}END{print "\n"  count}' file1  统计字段长度大于等于2单词，并统计计数
+ee 10005 81 93 20 ff 10006 13 89 52 gg 10007 25 35 73 hh 10008 21 94 31 
+20
+awk 'END{print NR}' file1 统计行数
+
+
+1.2、行相加
+[root@Start ~]# awk   '{$6=$4+$5+$3}{print $0,$6,int($6/3)}'  file1
+ee 10005 81 93 20 194 64
+ff 10006 13 89 52 154 51
+gg 10007 25 35 73 133 44
+hh 10008 21 94 31 146 48
+1.3、统计列
+[root@Start ~]#  awk  '{tol3+=$3;tol4+=$4;tol5+=$5}END{print tol3,tol4,tol5}'  file1 此方法非常有用，需要掌握
+140 311 176
+
+说明：
+awk变量
+生产场景中常用使用'{a=$4+$5+$3}{print $0,a,int(a/3)}'
+一对大括号中，如果定义多个变量用分号隔开如{a=1；b=2}
+还有以下两种方法定义变量和赋值：
+awk 'BGEGIN{var="variable testing";print var}'
+awk -v  var="variable testing" 'BGEGIN{print var}'
+应用外部变量
+a=1
+awk -vb=$a  'BGEGIN{print b}'
+或
+awk  'BGEGIN{print '$b'}'
+必须使用单引号
+提示：awk中，变量引用无需使用$符号
+
+
+
+
+1.3
+[root@Start ~]# awk 'NR==FNR{a[FNR]=$1}NR!=FNR{print a[FNR],$2}' file1  file2  
+注意：此例中NR==FNR表示awk在处理第一个文件，{a++}表示每处理一行累计，统计第一个文      件中的行数
+      NR!=FNR表示awk在处理第二个文件，此题思想很重要
+[root@Start ~]# awk '1' file1  
+此种写法相当与awk '{print $0}' file1 ,1可以是其它非0的数字即可
+
+[root@Start ~]# awk '{$1="tan"}1' file1 
+此种写法相当与awk '{$1="tan"}{print $0}' file1
+给$1赋值，然后全部打印出来
+
+[root@Start ~]# awk 'NR==FNR{a[FNR]=$1}NR!=FNR{print a[FNR],$2}' file1   file2 
+数组的办法a[NR]表示第一个文件的某列，把两个文件中的A和B列重新组合成为新的文件 
+数组的办法a[FNR]表示第二个文件的某列，但是a[FNR]的行号和第一个文件中是一样的，可以理解实际上是存放一个文件的$1这一列，所在a[FNR]打印输出为在NR==FNR{a[NR]=$1中定义的值，再把两个文件中的A和B列重新组合成为新的文件 
+
+
+
+三、awk数组功能（重重点，必须要掌握）
+3.1统计次数
+[root@Start ~]# awk '{array[$3]++}END{for(i in array) print i,array[i]}' file1
+[root@Start ~]# awk '{array[$4]++}{array1[$5]++}END{for(count in array)print array[count],count}END{print "======="}END{for(count1 in array1)print array1[count1],count1}' file1 
+统计多个不同列的计数，可以写在一起
+说明：
+第一步：
+array[$3]定义一个下标为$3名称为array的数组，初始化为1
+$3这列值有很多，所有array[$3]这素组下标不是数字，而是其它的字符串，组成一个个素组的元素，如：array[aa],array[bb],array[cc],array[dd],在C语言中是不允许这样定义的，有所区别，所以这个一定要理解，不然这个很难看懂，
+第二步：
+array[$3]++把$4这列的值赋给数组，最后结果就是array[aa]=1,array[bb]=1,array[cc]=1,array[dd]=1，当做变量存起来
+awk一行行读入的时候，如果下次遇到arry[aa]这个数组，这个时候值就是2了，以此类推，其它数组的元素也是如此，
+最后：
+通过固定的写法for(i in array)遍历整个数组的元素，
+print i,array[i]打印出下标i，和打印i下标对应数组元素的值array[i]
+最后的结果就是array[aa]=2 aa ,所有aa出现的次数为2次
+小结：统计某列出现的次数就用array[$N]++
+      统计以某列为下标，其它列相加可以用array[$N]+=$1+$2....
+关键是理解思想，不然很难看得懂
+3.2取奇偶行
+[root@Start ~]# awk 'NR%2==1{print NR,$0}'  file1
+取奇数或者偶数行或任意之间的行通过NR%取模的办法
+3.2取任意行和列
+
+
+3.3去重awk '!a[$0]++'
+[root@Start ~]# awk '/^tcp/'  netstat.log|awk '{a[$4]=$0}END{for(i in a)print a[i]}'
+[root@Start ~]# awk '/^tcp/'  netstat.log|awk '{a[$4]=$0}END{for(i=1;i<=asort(a);i++)print a[i]}' 进行升序排列，也可以通过sort进行排序，这样更简单
+这个方法工作中最实用，必须掌握之，灵活运用awk数组统计次数,这个是以以后面的为基准去重
+[root@Start ~]# awk '/^tcp/{print $4}'  netstat.log |awk '!a[$1]++{print $0}'
+awk '!a[$0]++'此方法为awk经典的去重方法
+"!"即非
+a[$1],以$1为数组的下标，建立数组a
+a[$1]++，即给数组a赋值，a[$0]+=1
+首先a[$1]执行其值为空!a[$0]结果就是非空
+awk '!a[$1]++'相当于 awk '1'打印输出
+当下次运行到a[$1]其值为1，!a[$0]结果就是0
+awk '!a[$1]++'相当于 awk '0'不打印输出
+结论：awk '!a[$1]++'是按照前面的基准去重
+
+
+二维数组（不重要，只是理解一下思想即可）
+[root@Start ~]# awk '{for(i=1;i<=NF;i++){a[NR,i]=$i}}END{for(j=1;j<=NR;j++){for(k=1;k<=NF;k++){printf a[k,j] " "}print ""}}' file1
+
+
+总结一下吧：
+1、
+循环条件为for(=1;i<=NF;i++)可能要遍历文档的所有元素了
+这样种情况下可以设置很多条件进行判断，从而得出想要的结果
+[root@Start ~]# awk '{for(i=1;i<=NF;i++)print $i}'  file1
+[root@Start ~]# awk '{for(i=1;i<=NF;i++)n++}END{print n}' file1 统计单词的个数
+[root@Start ~]# awk '{for(i=1;i<=NF;i++)if($i==31)n++}END{print n}'统计某个单词出现的次数
+[root@Start ~]# awk  '{for(i=1;i<=NF;i++)if(length($i)>=2) printf $i " ",count++}END{print "\n"  count}' file1  
+统计字段长度大于等于2单词，并统计计数
+[root@Start ~]#  awk  '{for(i=1;i<=NF;i++)if($i==31)printf  NR i " " ,count++}END{print "\n"  count}' file1 
+统计单词是31的出现的位置，并统计计数
+有个细节需要注意：printf是标准化格式输出，其格式为"%d%d....",value,value.....如果不指定printf后面所有的都打印输出，直到有逗号为止，逗号后面的由于没有指定格式，不打印输出
+在统计计count++可以不用打印，执行END的时候再打印，就可以采取以上的办法
+
+2、
+数组为a[NR]=$0或者a[NR]=$n，循环为for(i=1;i<=NR;i++)
+的时候，可能要打印行或者列了（也可以取某一行或某一列）
+[root@Start ~]# awk '{a[NR]=$0}END{for(i=1;i<=NR;i++)print a[i]}'  file1取行
+[root@Start ~]# awk '{a[NR]=$1}END{for(i=1;i<=NR;i++)print a[i]}'  file1取列
+以上两个方法可以去掉任意和和列
+去掉不需要的行列和奇偶行列
+for(i=1;i<=NR;i++)循环中更容易的说明
+i=1循环开始点（修改可以取掉前N行）
+i<=NR循环结束点（修改可以取掉结尾N行）
+i++循环的步长（修改可以取任意行）
+
+3、
+
+行相加
+[root@Start ~]# awk   '{$6=$4+$5+$3}{print $0,$6,int($6/3)}'  file1
+ee 10005 81 93 20 194 64
+ff 10006 13 89 52 154 51
+gg 10007 25 35 73 133 44
+hh 10008 21 94 31 146 48
+统计列
+[root@Start ~]# awk '{a+=$3}END{print a}' file 
+80055222552
+此方法非常有用，需要掌握
+
+
+
+4、
+数组为a[$n++]或a[$n1+=$n2],循环为for(i in a)写在END后面
+的时候，这个时候是对某列去重计数，或某列的值相加
+[root@Start ~]# awk '{array[$3]++}END{for(i in array) print i,array[i]}' file1
+[root@Start ~]# awk '{array[$4]++}{array1[$5]++}END{for(count in array)print array[count],count}END{print "======="}END{for(count1 in array1)print array1[count1],count1}' file1 
+统计多个不同列的计数，可以写在一起
+[root@Start ~]# awk '{a[$1]+=$3}END{for(i in a)print i,a[i]}' file  
+2016-10-01 40027611276
+2015-10-01 40027611276
+此方法类似于数据的合并统计，非常之实用
+注意：以上两种方法是去重计数，对某列或者某几列，去重计数只是单纯统计出去重列和出现的次数
+
+[root@Start ~]# awk 'END{print NR}' file1 统计行数功能和wc -l相同
+单纯的去重方法（内容格式不变）：
+[root@Start ~]# cat file
+2015-10-01 ee 10005819320
+2016-10-01 ee 10005819320
+2015-10-01 ff 10006318952
+2016-10-01 ff 10006318952
+2015-10-01 gg 10007253573
+2016-10-01 gg 10007253573
+2015-10-01 hh 10008219431
+2016-10-01 hh 10008219431
+[root@Start ~]# awk '!a[$3]++' file  
+2015-10-01 ee 10005819320
+2015-10-01 ff 10006318952
+2015-10-01 gg 10007253573
+2015-10-01 hh 10008219431
+!a[$3]++显示最早的出现行，此方法很实用，简单快捷
+[root@Start ~]# awk '{a[$3]=$0}END{for(i in a)print a[i]}'  file 
+2016-10-01 ff 10006318952
+2016-10-01 ee 10005819320
+2016-10-01 gg 10007253573
+2016-10-01 hh 10008219431
+显示最近出现的行，此方法工作中非常之有用，务必掌握之
+
+5、
+当有NR==FNR，NR!=FNR字样的时候，说明在处理多个文件（一般是两个）
+把A文件的某一列和B文件某一列组成新的数据
+[root@Start ~]# awk 'NR==FNR{a[FNR]=$1}NR!=FNR{print a[FNR],$2}' file1  file2  
+注意：此例中NR==FNR表示awk在处理第一个文件，{a++}表示每处理一行累计，统计第一个文      件中的行数，完全和数据库的链接查询相似
+      NR!=FNR表示awk在处理第二个文件，此题思想很重要
+[root@Start ~]# awk 'NR==FNR{a[$5]=$0}NR!=FNR{$3=a[$3];print $0}' file1  file2
+此题原理和上面一样
+首先在第一个文件中定义一个以$5为下标的数组a，把整个文件的值赋给数组a
+第二个文件中，取出数组a的值，注意：数组a的元素对应的下标之前都定义好了，所有在第二个文件中所对应的下标为$3，所有这个地方需要重点理解一下，本人也是理解了很久的
+最后把$3的列用a[$3]替换，（$3其实也可以换成其它列，由于替换的是下标所在的列，所以一般这样替换即可
+[root@Start ~]# cat file1  file2 
+10005 81 93 20 ee
+10006 31 89 52 ff
+10007 25 35 73 gg
+10008 21 94 31 hh
+1 4.53.116.110 ee
+2 202.97.34.42 ff
+3 4.53.211.209 gg
+4 173.199.5.16 hh
+[root@Start ~]# awk 'NR==FNR{a[$5]=$0}NR!=FNR{$3=a[$3];print $0}' file1  file2 
+[root@Start ~]# awk 'NR==FNR{a[$5]=$0;next}NR!=FNR{$3=a[$3]}1' file1  file2（熟练后可以这样简写）
+1 10005 81 93 20 ee ee
+2 10006 31 89 52 ff ff
+3 10007 25 35 73 gg gg
+4 10008 21 94 31 hh hh
+
+
+
+awk练习题：
+1.统计ip出现的次数，大于3的定向到a文件，否则定向到b文件
+[root@Start ~]# awk '/^tcp/{a[$4]++}END{for(i in a){if(a[i]>3)print a[i],i >"c";else print a[i],i >"d"}}' netstat.log 
+awk本身就有重定向的功能后面接 >"文件名"
+
+2.在/etc/passwd中，如果是root用户就显示Admin其它用户显示common user
+[root@Start ~]# awk -F ":" '{if($1=="root") print $1,"Admin";else print $1,"common user"}'  /etc/passwd 
+[root@Start ~]# awk -F ":" '$1~/root/{print $1,"Admin"}$1!~/root/{print $1,"common user "}'  /etc/passwd 
+
+
+
+
+awk定义字符串变量需要加""双引号
+echo|awk 'BEGIN {a=1.234;var=" is a number";}\
+{b=avar;print "b=[avar],res=["b"]"}\
+{b=a var;print "b=[a var],res=["b"]"}\
+{b="a var";print "b=[\"a var\"],res=["b"]"}\
+{b="a" var;print "b=[\"a\" var],res=["b"]"}\
+{b=""a" var";print "b=[\"\"a\" var\"],res=["b"]"}\
+{b=""a" var";print "b=[\"\"a\" var\"],res=['b']"
+结果为：
+b=[avar],res=[]
+b=[a var],res=[1.234 is a number]
+b=["a var"],res=[a var]
+b=["a" var],res=[a is a number]
+b=[""a" var"],res=[1.234 var]
+b=[""a" var"],res=[b]
+此题主要是考察变量[""]和['']已经""""双引号之间的关系
+变量在[""]和""""中，需要解析出变量
+变量在['']中，原样输出
+如果没有带中括号，引用变量无需带任何引号和括号
+输出字符串用双引号""
+引用外部变量到awk中，需要用'$value'一定要用$''来引用
+
+
+if和for语句中
+{}是表示范围，表示这个if或for语句中
+for和if后面接只是接一个{}内容，表示它的执行动作，
+for和if后面如果还有多个执行的动作，用;分号隔开
+[root@Start ~]# awk -vn=0 '{for(i=1;i<=NF;i++){n++;if(n%4==0){printf $i " "}}print xxoo}' file1
+拆分：
+{for(i=1;i<=NF;i++)      {n++;if(n%4==0)    {printf $i " "}       }            }
+里面的两个{}都是for循环的范围，且后面只能跟一个{}，其余都是它里面的
+for执行后，再执行{n++;if(n%4==0)    {printf $i " "}       }里面的{}可以写for执行后的命令，可以用;分号隔开，这个很容易搞错
+执行完for循环一行记录后（awk工作原理是一行行读取数据）就执行 print xxoo,xxoo就是可以理解是换行的意思（属性awk内置的变量）
+[root@Start ~]# awk '{for(i=1;i<=NF;i++){a[$i]++}}END{for(i in a){if(a[i]>1){print a[i],i}}}' file1|sort -rn
+统计每个字段在文本中出现的次数，此语句思路非常重要，务必全部要掌握，记也要给我记住了
+
