@@ -41,6 +41,15 @@
     1：不能使用swap
     2：swap+ram*overcommit_ratio
 
+	/proc/sys/vm/drop_caches： ps aux | awk '{mem += $6} END {print mem/1024/1024}'
+    1：释放页page缓存
+    2：释放slab缓存
+    3：释放以上两种
+
+	/proc/sys/vm/vfs_cache_pressure:系统在进行内存回收时，会先回收page cache, inode cache, dentry cache和swap cache。vfs_cache_pressure越大，每次回收时，inode cache和dentry cache所占比例越大
+	vfs_cache_pressure默认是100，值越大inode cache和dentry cache的回收速度会越快，越小则回收越慢，为0的时候完全不回收
+
+	/proc/sys/vm/swappiness:该配置用于控制系统将内存swap out到交换空间的积极性，取值范围是[0, 100]。swappiness越大，系统的交换积极性越高，默认是60，如果为0则不会进行交换。
 
     /proc/sys/vm/nr_hugepages调整大页内存
 
@@ -72,4 +81,8 @@
         修改磁盘调度器echo "" > /sys/block/sda/queue/scheduler
         每磁盘一个调度器
 
+	
+    cat /proc/sys/net/ipv4/tcp_tw_reuse重用，此参数开启那么tcp_timestamps一定要开启
+	cat /proc/sys/net/ipv4/tcp_timestamps时间戳，
+	cat /proc/sys/net/ipv4/tcp_tw_recycle快速关闭，在直接对外服务器是一定不能打开的(经过net上网的不能保证每个客户端机器的时间是一致的)，内网可以打开
 </pre>

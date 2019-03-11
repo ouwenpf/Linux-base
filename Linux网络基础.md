@@ -157,6 +157,8 @@ ip：命令
                 ip route add IP/24 via 192.168.0.2        route add -net IP/24 gw 192.168.0.2
                 ip route  add 172.16.1.0/24   dev eth0    route add -net|-host  dev eth0
                 ip route add|del default via 192.168.80.130   route add|del default gw 192.168.80.130
+
+				ip route get IP 从哪个设备出去
             删除路由：
                 ip route del
                     TARGET：

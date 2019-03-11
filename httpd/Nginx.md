@@ -65,11 +65,28 @@ nginx的工作模式，非阻塞，事件驱动，由一个master进程生成多
     制作好的程序包：rpm包
     
     编译安装：
-        # useradd -r -M -s /sbin/nologin nginx
-        # yum install  pcre pcre-devel -y
-        # ./configure --prefix=/usr/local/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_stub_status_module --with-debug
+        # useradd -r -M -s /sbin/nologin www
+        # yum install -y gcc make pcre pcre-devel openssl-devel zlib-devel perl perl-devel perl-ExtUtils-Embed
+        # ./configure --prefix=/usr/local/nginx --user=www --group=www --with-http_ssl_module --with-http_stub_status_module --with-debug --add-module=../nginx-sticky-module-1.1 --add-module=../nginx_upstream_check_module-master --add-module=../ngx_devel_kit-0.3.0
         # make && make install 
+	
+		./configure --prefix=/usr/local/nginx --conf-path=/usr/local/nginx/conf/nginx.conf --user=www --group=www --http-log-path=/data/logs/nginx/nginx_access.log --error-log-path=/data/logs/nginx/nginx_error.log --pid-path=/var/run/nginx.pid --http-client-body-temp-path=/usr/local/nginx/cache/client --http-proxy-temp-path=/usr/local/nginx/cache/proxy --http-fastcgi-temp-path=/usr/local/nginx/cache/fcgi --http-uwsgi-temp-path=/usr/local/nginx/cache/uwsgi --http-scgi-temp-path=/usr/local/nginx/cache/scgi --with-http_stub_status_module --with-http_ssl_module --with-http_perl_module --with-stream --with-http_stub_status_module --with-debug
 
+
+	安装xcache
+		wget http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz
+		/usr/local/php/bin/phpize
+		tar xf  xcache-3.2.0.tar.gz 
+		cd xcache-3.2.0
+		./configure --prefix=/usr/local/php/lib/php/extensions --with-php-config=/usr/local/php/bin/php-config  --enable-xcache
+		egrep -v  ';|^$'   xcache.ini   >>  /usr/local/php/lib/php.ini
+		这样修改的地方
+			xcache.size =        128M
+			touch /tmp/xcache
+			chmod 777 /tmp/xcache
+			xcache.mmap_path =  "/tmp/xcache"
+		-------------------------------------------
+		重启php和nginx即可
     配置文件：
         main配置段：全局配置段
         event：定义event模型工作特性

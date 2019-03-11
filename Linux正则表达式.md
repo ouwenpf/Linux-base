@@ -211,6 +211,8 @@ sed高级用法，保持空间，默认为模式空间
 			3. a=test,b=test1
 			   awk 'NF>"'$a'" && NF<"'$b'" {print $1}'
                注意变量后面有分号结束，awk中都要使用中括号 
+			awk中使用:'$var'或"'$var'" awk '{print '$var'}'
+			sed中使用：sed 's/200/'$var'/g'
     3、printf命令
         格式化输出：
             (1)FORMAT必须给出
