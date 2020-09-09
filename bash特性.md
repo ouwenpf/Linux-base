@@ -113,11 +113,11 @@
                 * unset name销毁变量
         * 环境变量：生效范围为当前shell进程及子进程
             * 变量声明、赋值：
-                * export name=value
-                * declare -x name=value 
+                * export name=value 
+                * declare -x name=value (相当于export设置环境变量)
             * 变量引用：$(name),$name
             * 显示已定义的所有变量
-                * export env printenv
+                * export env printenv set(四个命令均可以查询)
                 * unset name
         * 局部变量：生效范围为当前shell进程中某代码片段(通常指函数)
         * 位置变量：$1,$2....来表示，用于让脚本在脚本代码中调用通过命令行传递给它的参数
