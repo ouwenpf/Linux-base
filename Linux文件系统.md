@@ -6,10 +6,10 @@
 FileSystem Heirache Standard:文件系统层次标准
 ---------------------------------------------------------------------------
 /boot:引导文件存放目录，内核文件(vmlinuz)、引导加载器(bootloader)都存放于此目录
-/bin:供所有用户使用的基本命令；不能关联至独立分区，OS启动即会用到的程序
-/sbin:管理类的基本命令；不能关联至独立分区，OS启动即会用到的程序
-/lib:基本的共享库文件，以及内核模块文件(/lib/modules)
-/lib64:专用于x86_64系统上的辅助共享库文件存放位置
+/bin:CentOS7下已经无此目录链接成/usr/bin
+/sbin:CentOS7下已经无此目录链接成/usr/bin
+/lib:CentOS7下已经无此目录链接成/usr/lib
+/lib64:CentOS7下已经无此目录链接成/usr/lib64
 /etc:配置文件目录(纯文件文件)
 /home/username:普通用户家目录
 /root:管理员家目录
@@ -25,11 +25,11 @@ FileSystem Heirache Standard:文件系统层次标准
 /tmp:临时文件
 
 
-/usr:universal shared,read-only data全局共享只读数据文件
-    bin:保证系统拥有完整功能而提供的应用程序
-    sbin:
-    lib:
-    lib64:/usr/bin和/usr/sbin用到基本共享库如果在/lib和lib64下没有，提供额外的基本共享库；配置文件仍然在/etc目录下
+/usr:universal shared,read-only data全局共享只读数据文件,系统软件和用户相关程序所在的目录,属于第二层次目录
+    bin:供所有用户使用的基本命令；不能关联至独立分区，OS启动即会用到的程序
+    sbin:管理类的基本命令；不能关联至独立分区，OS启动即会用到的程序
+    lib:基本的共享库文件，以及内核模块文件(/lib/modules)
+    lib64:/usr/bin和/usr/sbin用到基本共享库如果在/lib和lib64下没有，提供额外的基本共享库；配置文件仍然在/etc目录下,专用于x86_64系统上的辅助共享库文件存放位置
     include:C程序的头文件(header files)，为库文件提供不同的调用方式(库文件理解为工具，头文件则是此工具的使用说明)
     share:结构化独立的数据，例如doc，man等
     src:源码存放位置，如：编译内核的时候
@@ -46,6 +46,7 @@ FileSystem Heirache Standard:文件系统层次标准
     run:运行中的进程相关的数据；通过用于存储进行的pid文件
     spool:应用程序的池数据
     tmp:保存系统两次重启之间产生的临时数据
+    dmesg:记录硬件信息加载的日记文件
     
     
 /proc:用于输出内核于进程信息相关的虚拟文件系统

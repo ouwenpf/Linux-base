@@ -62,7 +62,8 @@ Unit的类型：
         systemctl enable|disable name.service
     查看服务是否开机自动：
         systemctl is-enabled name.service
-    禁止和取消禁止为开机自启动(服务不能启用)：
+        ll /etc/systemd/system/multi-user.target.wants/查询开机自启动那些服务
+    禁止和取消禁止启动(服务不能启用)：
         systemctl mast|unmast name.service
     查看所有服务的开机自启的状态
         systemctl list-unit-files --type service

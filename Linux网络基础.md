@@ -195,18 +195,17 @@ Linux网络属性配置
     
     
     /etc/sysconfig/network-scripts/ifcfg-iface
+        TYPE=Ethernet 接口类型，常见的有Ethernet，Bridge
         DEVICE：此配置文件应用到的设备
         HWADDR：对应此设备的mac地址
         BOOTPROTO：激活此设备时使用的地址配置协议，常用的dhcp，static，none，bootp
-        NM_CONTROLLED：NM是NetworkManger的简写，此网卡是否接受NM管理控制：CentOS建议改为“no”
         ONBOOT：在系统引导时是否激活此设备
-        TYPE：接口类型，常见的有Ethernet，Bridge
         UUID：设备的唯一标识
         
         IPADDR：指明IP地址
-        NETMASK：子网掩码
+        PREFIX=24 子网掩码
         GATEWAY：默认网关
-        DNS1：第一个DNS服务器指向
+        DNS1：第一个DNS服务器指向,这里配置好网卡重启会覆盖/etc/resolv.conf和更新到/etc/resolv.conf的配置文件中
         DNS2：第二个DNS服务器指向
         USERCTL：普通用户是否可控制此设备
         PEERDNS：如果BOOTPROTO的值为"dhcp"，是否允许dhcp Server分配的dns

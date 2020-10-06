@@ -164,8 +164,9 @@
                 * command > /path/to/file.out1 2> &1
             * 合并标准输出和错误输出为同一个数据流进行重定向
                 * &>
+                    * command  &>/path/to/file.out1 
                 * &>> 
-            
+                    * command  &>>/path/to/file.out1 
 
 ###bash算术运算
 
