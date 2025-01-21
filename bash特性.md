@@ -115,6 +115,29 @@
             * 变量声明、赋值：
                 * export name=value 
                 * declare -x name=value (相当于export设置环境变量)
+                * declare -a my_array :声明一个普通数组
+                * declare -A my_array : 声明一个关联数组
+                * declare -i my_int : 声明一个整数变量
+                * declare -r my_var : 声明一个只读变量
+                * declare -p my_var : 打印变量的声明和当前值。通常用于调试
+                * declare -f|F  : -f显示函数定义,-F只显示函数不显示函数体
+                * declare -n : 创建一个引用其他变量的"引用"变量,eval命令相似
+                  ```
+                  var="Hello"
+					declare -n ref_var=var
+					echo $ref_var  # 输出：Hello
+
+                  ```
+                * declare -l : 将变量的值转换为小写。
+                  ```
+				  declare -l my_var="LOWERCASE"
+				  echo $my_var  # 输出：lowercase
+                  ```
+                * declare -u : 将变量的值转换为大写
+                  ```
+                  declare -u my_var="uppercase"
+				  echo $my_var  # 输出：UPPERCASE
+                  ```
             * 变量引用：$(name),$name
             * 显示已定义的所有变量
                 * export env printenv set(四个命令均可以查询)
@@ -132,6 +155,7 @@
         * 只读变量
             * readonly name
             * declare -r name
+            
 
 * 变量的命名法则：
     * 不能使用程序中的保留字
@@ -652,6 +676,30 @@ esac
     注意：省略[INDEX]表示引用下标为0的元素
 数组的元素个数：${#ARRAY_NAME[*]}或者${#ARRAY_NAME[@]}
 向数组中追加元素：ARRAY[${#ARRAY_NAME[*]}]
+
+特殊用法:
+a='192.168.0.12
+192.168.0.13
+'
+mapfile -t b <<< "$a"
+使用 mapfile：mapfile -t b <<< "$a" 用于将字符串 a 中的每一行读取到数组 b 中：
+    -t 选项表示在读取时去掉每行末尾的换行符。
+	-d 选项，mapfile就会用你指定的delim作为行的结束符，而不是使用默认的换行符
+		a='192.168.0.12 192.168.0.13'
+		mapfile -d ' ' b <<< "$a"
+    <<< "$a" 是一个输入重定向，表示将字符串 a 作为输入传给 mapfile 命令。
+
+
+c='192.168.0.12 192.168.0.13'
+IFS=' ' read -ra d <<< "$c"
+
+IFS=' ' 将内部字段分隔符 (Internal Field Separator) 设置为一个空格。这个变量决定了 read 命令如何分割输入字符串。
+-r 表示读取原始输入，不对反斜杠进行转义。
+-a d 表示将分割后的结果存储到数组 d 中。
+<<< "$c" 是一个输入重定向，表示将字符串 c 作为输入传给 read 命令。
+
+
+
 实例：生成20个随机数，并找出最大值和最小值
 #!/bin/bash
 #
@@ -734,8 +782,8 @@ echo "$line"
     ${var/#pattern}   
     ${var/%pattern}   
 字符大小写转换：
-    ${var^^}：把var中所有大写转换为小写
-    ${var,,}：把var中所有小写转换为大写
+    ${var,,}：把var中所有大写转换为小写
+    ${var^^}：把var中所有小写转换为大写
 变量赋值：
     ${var:-value}：如果var为空或为设置，那么返回value，否则，则返回var的值
     ${var:=value}：如果var为空或为设置，那么返回value，并将value赋值给var，否则，则返回var的值

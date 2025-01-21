@@ -10,3 +10,5 @@ GREP_OPTIONS="--color=auto"
 alias grep='grep --colour=auto'
 alias egrep='egrep --colour=auto'
 alias fgrep='egrep --colour=auto'
+
+PS1='[\[\e[31m\]\u@\[\e[36m\]\h \w\[\e[37m\]]\[\e[33m\]\$\[\e[m\] '

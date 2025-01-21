@@ -6,15 +6,19 @@
 #########################################################################
 #!/bin/sh
 
-RES='\E[0m'
-RED_COLOR='\E[1;31m'
-GREEN_COLOR='\E[1;32m'
-YELLOW_COLOR='\E[1;33m'
-BLUE_COLOR='\E[1;34m'
-PURPLR_COLOR='\E[1;35m'
-SKY_BLUE_COLOR='\E[1;36m'
-BLACK_COLOR='\E[30m'
-WHITE_COLOR='\E[1;37m'
+# 颜色设置
+RES='\e[0m'
+BLACK_COLOR='\e[30m'       # 黑色字 
+RED_COLOR='\e[1;31m'       # 红色字
+GREEN_COLOR='\e[1;32m'     # 绿色字
+YELLOW_COLOR='\e[1;33m'	   # 黄色字
+BLUE_COLOR='\e[1;34m'      # 蓝色字
+PURPLE_COLOR='\e[1;35m'    # 紫色字
+SKY_BLUE_COLOR='\e[1;36m'  # 天蓝色字
+WHITE_COLOR='\e[1;37m'     # 白色字
+
+
+#echo -e "\e[1;4;5;42;31m字符串内容\e[0m"   1:高亮,4:下划线,5:闪烁,42:背景绿色,31m:字体颜色
 
 ADD_COLOR(){
     case `echo $1|tr "[A-Z]" "[a-z]"` in
